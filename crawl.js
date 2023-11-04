@@ -1,29 +1,52 @@
 const {JSDOM} = require('jsdom')
 
 
-let fetchurl = async (url)=>{
-    console.log(`starting crawl of ${url}`)
+let fetchurl = async (baseurl,suburl,pages)=>{
+    console.log(`actively crawl of ${suburl}`)
+
+    // to check suburl is part of baseurl as we dont have to crawl external pages
+    const baseurlObj = new URL(baseurl);
+    const suburlObj = new URL(suburl)
+    if(baseurlObj.hostname !== suburlObj.hostname){
+        return pages
+    }
+
+    // to keep track of count of specific url being used in page
+    const normalizedsubURL = normalizeURL(suburl)
+    if(pages[normalizedsubURL]>0){
+        pages[normalizedsubURL]++
+        return pages
+    }
+    pages[normalizedsubURL] = 1
+
+    // fetches url
     try{
-        const res = await fetch(url)
-        if(res.status >399){
-            console.log(`error in fetch with status code ${res.status} on page ${url}`)
-            return
+        const res = await fetch(suburl)   
+        if(res.status >399){   // checks for error codes
+            console.log(`error in fetch with status code ${res.status} on page ${suburl}`)
+            return pages
         }
+        //check content-type for response
         if(!res.headers.get('content-type').includes('text/html')){ // dont use res.headers.get('content-type') !== 'text/html' as other string s can be include like charset="utf-8"
-            console.log(`non HTML response of ${url} content-type ${res.headers.get('content-type')}`)
-            return
+            console.log(`non HTML response of ${suburl} content-type ${res.headers.get('content-type')}`)
+            return pages
         }
-        let data = await res.text()
-        console.log(data)
+        let data = await res.text()  // formats data in in html form
+        const nextURLs = getURLFromHTML(data,baseurl)  // getting links from baseurl
+        // iterating over links returned by nextURLs 
+        for(const nextURL of nextURLs){
+            // calling function recursively until two base conditions met
+            pages = await fetchurl(baseurl,nextURL,pages) 
+        }
         
     }
-    catch(err){
-            console.log(`error in fetching ${url} , error message : ${err.message}`)
+    catch(err){  // catches error
+            console.log(`error in fetching ${suburl} , error message : ${err.message}`)
         }
-        
-
-    
+        return pages
 }
+
+
 let getURLFromHTML = (HTMLBody,baseURL) =>{
     const urls = []
     let dom = new JSDOM(HTMLBody)  // created JSDOM object and passed HTML code in it
