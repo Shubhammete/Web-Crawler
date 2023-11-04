@@ -1,4 +1,5 @@
- const {fetchurl} = require('./crawl.js')
+const {fetchurl} = require('./crawl.js')
+const {printReport} = require('./report.js')
 // import { fetchurl } from "./crawl.js"
 let main = async ()=>{
     if(process.argv < 3){   // process.argv tracks CL arguments first arg is package manager second arg is main.js or entrypoint file name and third argument is website we pass
@@ -12,8 +13,9 @@ let main = async ()=>{
     const baseURL = process.argv[2]  // 2nd arugment that is our url
     console.log(`starting crawl ${baseURL}`) 
     const pages = await fetchurl(baseURL,baseURL,{}) 
-    for(const page of Object.entries(pages)){
-        console.log(page)
-    }
+    // for(const page of Object.entries(pages)){
+    //     console.log(page)
+    // }
+    printReport(pages)
 }
 main()
