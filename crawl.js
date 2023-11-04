@@ -1,5 +1,29 @@
 const {JSDOM} = require('jsdom')
 
+
+let fetchurl = async (url)=>{
+    console.log(`starting crawl of ${url}`)
+    try{
+        const res = await fetch(url)
+        if(res.status >399){
+            console.log(`error in fetch with status code ${res.status} on page ${url}`)
+            return
+        }
+        if(!res.headers.get('content-type').includes('text/html')){ // dont use res.headers.get('content-type') !== 'text/html' as other string s can be include like charset="utf-8"
+            console.log(`non HTML response of ${url} content-type ${res.headers.get('content-type')}`)
+            return
+        }
+        let data = await res.text()
+        console.log(data)
+        
+    }
+    catch(err){
+            console.log(`error in fetching ${url} , error message : ${err.message}`)
+        }
+        
+
+    
+}
 let getURLFromHTML = (HTMLBody,baseURL) =>{
     const urls = []
     let dom = new JSDOM(HTMLBody)  // created JSDOM object and passed HTML code in it
@@ -40,5 +64,6 @@ let normalizeURL = (urlString)=>{
 // export module to make function available to other files or modules
 module.exports={
     normalizeURL,
-    getURLFromHTML
+    getURLFromHTML,
+    fetchurl
 }

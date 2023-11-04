@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "CLI Tool to navigate the links in web-page",
   "main": "index.js",
-  "type": "module",
+  
   "scripts": {
     "start": "node index.js",
     "test": "jest"
